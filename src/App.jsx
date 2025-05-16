@@ -50,16 +50,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
-      {rfidLogs.map((log, index) => (
-        <UserCard
-          key={index}
-          uid={log.uid}
-          timestamp={log.time}
-          isLatest={index === 0} // or whatever logic you want
-          log={log}
-        />
-      ))}
-
+    
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
@@ -73,7 +64,18 @@ function App() {
 
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Scan Information</h2>
-          <ScanHistory logs={rfidLogs} />
+          {/* <ScanHistory logs={rfidLogs} /> */}
+          {[...rfidLogs].reverse().map((log, index) => (
+  <UserCard
+    key={log.uid + index}
+    uid={log.uid}
+    timestamp={log.timestamp}
+    isLatest={index === 0}
+    log={log}
+  />
+))}
+
+
         </div>
       </main>
     </div>

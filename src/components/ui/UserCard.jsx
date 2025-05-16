@@ -52,21 +52,53 @@ const UserCard = ({ uid, timestamp, isLatest, log }) => {
             )}
           </div>
 
-          <div className="flex-grow">
-            <h2 className="text-2xl font-bold text-gray-800">{data?.name || 'Name not shared'}</h2>
+     <div className="flex-grow">      {/* Name and documents in one row */}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
-              <div className="flex items-center text-sm text-gray-600">
-                <MapPinIcon size={16} className="mr-2 text-blue-500" />
-                <span>{data?.address || 'Address not shared'}</span>
-              </div>
+       <h2 className="text-2xl font-bold text-gray-800">
+          {data?.name || 'Name not shared'}
+       </h2>
 
-              <div className="flex items-center text-sm text-gray-600">
-                <IdCardIcon size={16} className="mr-2 text-blue-500" />
-                <span>ID: {data?.id || 'N/A'}</span>
-              </div>
-            </div>
-          </div>
+   {/* Address and other info below */}
+  <div className="flex flex-col md:flex-row md:items-start md:gap-8">
+
+    <div className="flex items-center text-sm text-gray-600">
+      <MapPinIcon size={16} className="mr-2 text-blue-500" />
+      <span>{data?.username|| 'Address not shared'}</span>
+    </div>
+  </div>
+  </div>
+
+{/* Documents Section */}
+<div className="mt-4 md:mt-0 flex flex-col items-start mr-40">
+  <h3 className="text-lg font-semibold text-gray-800 flex items-center mb-2">
+    <IdCardIcon size={18} className="mr-2 text-blue-500" />
+    Documents
+  </h3>
+
+  {data?.uploadedDocuments && Object.keys(data.uploadedDocuments).length > 0 ? (
+    <ul className="space-y-2">
+      {Object.entries(data.uploadedDocuments).map(([docId, doc], idx) => (
+        <li
+          key={docId}
+          className="flex justify-between items-center p-2 bg-gray-50 rounded border border-gray-200"
+        >
+          <span className="text-sm text-gray-700">{doc.name || `Document ${idx + 1}`}</span>
+          <a
+            href={doc.path}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
+          >
+            View
+          </a>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p className="text-sm text-gray-400">No documents uploaded</p>
+  )}
+</div>
+ 
         </div>
 
         <div className="mt-6 pt-4 border-t border-gray-100">
