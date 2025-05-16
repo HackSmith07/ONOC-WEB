@@ -36,7 +36,7 @@ function App() {
         // Show scanning animation
         setIsScanning(true);
         setTimeout(() => setIsScanning(false), 2000);
-        
+
         // Add new log to the state
         setRfidLogs((prevLogs) => [...prevLogs, data]);
       }
@@ -50,7 +50,16 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
-      <UserCard logs={rfidLogs}/>
+      {rfidLogs.map((log, index) => (
+        <UserCard
+          key={index}
+          uid={log.uid}
+          timestamp={log.time}
+          isLatest={index === 0} // or whatever logic you want
+          log={log}
+        />
+      ))}
+
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
@@ -61,7 +70,7 @@ function App() {
           </div>
           <ScanAnimation isScanning={isScanning} />
         </div>
-        
+
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Scan Information</h2>
           <ScanHistory logs={rfidLogs} />

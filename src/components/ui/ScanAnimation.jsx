@@ -12,7 +12,7 @@ const ScanAnimation = ({ isScanning }) => {
           }}
         />
       )}
-      <style jsx>{`
+      <style>{`
         @keyframes scanning {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(400%); }
