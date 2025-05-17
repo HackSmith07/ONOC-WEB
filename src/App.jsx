@@ -6,6 +6,14 @@ import ScanAnimation from "./components/ui/ScanAnimation";
 import ScanHistory from "./components/ui/ScanHistory";
 import UserCard from "./components/ui/UserCard";
 import DocumentModal from "./components/ui/DocumentModal";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+// import {  query, orderByChild, equalTo } from "firebase/database";
 
 // Firebase config - Replace with your actual config values
 const firebaseConfig = {
@@ -27,6 +35,7 @@ function App() {
   const [rfidLogs, setRfidLogs] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
+  const [rfid, setrfid] = useState([]);
 
   useEffect(() => {
     const rfidRef = ref(database, "rfid");
@@ -48,6 +57,37 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+
+  useEffect(() => {
+    const fetchDocs = async () => {
+      if (rfidLogs.length === 0) return;
+
+      const firestore = getFirestore();
+      const userinfoRef = collection(firestore, "rfidDocs");
+
+      // Extract all unique UIDs from rfidLogs
+      const uids = [...new Set(rfidLogs.map((log) => log.uid))];
+
+      // Firestore allows up to 10 values in an 'in' query
+      const chunks = [];
+      for (let i = 0; i < uids.length; i += 10) {
+        chunks.push(uids.slice(i, i + 10));
+      }
+
+      let results = [];
+      for (const chunk of chunks) {
+        const q = query(userinfoRef, where("rfid", "in", chunk));
+        const snapshot = await getDocs(q);
+        snapshot.forEach((doc) => {
+          results.push({ id: doc.id, ...doc.data() });
+        });
+      }
+
+      setrfid(results); // setRfid is your state updater
+    };
+
+    fetchDocs();
+  }, [rfidLogs]); // run whenever rfidLogs updates
   useEffect(() => {
     const handleRightClick = (e) => {
       if (selectedDocument) {
@@ -62,8 +102,6 @@ function App() {
     };
   }, [selectedDocument]);
 
-
-
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -75,10 +113,11 @@ function App() {
               RFID Scanner Status
             </h2>
             <div
-              className={`px-3 py-1 text-xs rounded-full ${isScanning
-                ? "bg-green-500 text-white"
-                : "bg-gray-200 text-gray-600"
-                }`}
+              className={`px-3 py-1 text-xs rounded-full ${
+                isScanning
+                  ? "bg-green-500 text-white"
+                  : "bg-gray-200 text-gray-600"
+              }`}
             >
               {isScanning ? "Active Scan" : "Ready to Scan"}
             </div>
@@ -91,11 +130,11 @@ function App() {
             Scan Information
           </h2>
           {/* <ScanHistory logs={rfidLogs} /> */}
-          {[...rfidLogs].reverse().map((log, index) => (
+          {[...rfid].reverse().map((log, index) => (
             <UserCard
               key={log.uid + index}
               uid={log.uid}
-             timestamp={new Date()}
+              timestamp={new Date()}
               isLatest={index === 0}
               log={log}
               onViewDocument={setSelectedDocument}

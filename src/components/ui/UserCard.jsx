@@ -1,29 +1,7 @@
-import React, { useEffect, useState } from "react";
 import { MapPinIcon, AwardIcon as IdCardIcon, UserIcon } from "lucide-react";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { firestoreDB } from "../../firebase";
 import { DownloadIcon } from "lucide-react"; // Add this with your existing imports
 
 const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    if (!log?.uid) return;
-
-    const unsubscribe = onSnapshot(
-      query(collection(firestoreDB, "rfidDocs"), where("rfid", "==", log.uid)),
-      (snapshot) => {
-        const receiverData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setData(receiverData[0] || null);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [log?.uid]);
-
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "";
 
@@ -59,10 +37,10 @@ const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
       <div className="p-6">
         <div className="flex flex-col md:flex-row gap-6">
           <div className="flex-shrink-0">
-            {data?.profilePic ? (
+            {log?.profilePic ? (
               <img
-                src={data.profilePic}
-                alt={data.name || "User"}
+                src={log.profilePic}
+                alt={log.name || "User"}
                 className="w-24 h-24 rounded-full object-cover border-2 border-gray-200"
               />
             ) : (
@@ -76,13 +54,13 @@ const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
             {" "}
             {/* Name and documents in one row */}
             <h2 className="text-2xl font-bold text-gray-800">
-              {data?.name || "Name not shared"}
+              {log?.name || "Name not shared"}
             </h2>
             {/* Address and other info below */}
             <div className="flex flex-col md:flex-row md:items-start md:gap-8">
               <div className="flex items-center text-sm text-gray-600">
                 <MapPinIcon size={16} className="mr-2 text-blue-500" />
-                <span>{data?.username || "Address not shared"}</span>
+                <span>{log?.username || "Address not shared"}</span>
               </div>
             </div>
           </div>
@@ -94,9 +72,9 @@ const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
               Documents
             </h3>
 
-            {data?.documents && Object.keys(data.documents).length > 0 ? (
+            {log?.documents && Object.keys(log.documents).length > 0 ? (
               <ul className="space-y-2">
-                {Object.entries(data.documents).map(([docId, doc], idx) => (
+                {Object.entries(log.documents).map(([docId, doc], idx) => (
                   <li
                     key={docId}
                     className="flex justify-between items-center p-2 bg-gray-50 rounded border border-gray-200"
