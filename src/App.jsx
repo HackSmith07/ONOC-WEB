@@ -5,6 +5,7 @@ import Header from "./components/ui/header";
 import ScanAnimation from "./components/ui/ScanAnimation";
 import ScanHistory from "./components/ui/ScanHistory";
 import UserCard from "./components/ui/UserCard";
+import DocumentModal from "./components/ui/DocumentModal";
 
 // Firebase config - Replace with your actual config values
 const firebaseConfig = {
@@ -15,8 +16,8 @@ const firebaseConfig = {
   storageBucket: "one-nation-one-card.firebasestorage.app",
   messagingSenderId: "745040048967",
   appId: "1:745040048967:web:1ae895ca2d7e48863c5262",
-  measurementId: "G-44B4JCPXQ8"
-}
+  measurementId: "G-44B4JCPXQ8",
+};
 
 // Initialize Firebase app once
 const app = initializeApp(firebaseConfig);
@@ -25,6 +26,7 @@ const database = getDatabase(app);
 function App() {
   const [rfidLogs, setRfidLogs] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState(null);
 
   useEffect(() => {
     const rfidRef = ref(database, "rfid");
@@ -46,37 +48,50 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
-    
+
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xl font-semibold text-gray-800">RFID Scanner Status</h2>
-            <div className={`px-3 py-1 text-xs rounded-full ${isScanning ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
-              {isScanning ? 'Active Scan' : 'Ready to Scan'}
+            <h2 className="text-xl font-semibold text-gray-800">
+              RFID Scanner Status
+            </h2>
+            <div
+              className={`px-3 py-1 text-xs rounded-full ${
+                isScanning
+                  ? "bg-green-500 text-white"
+                  : "bg-gray-200 text-gray-600"
+              }`}
+            >
+              {isScanning ? "Active Scan" : "Ready to Scan"}
             </div>
           </div>
           <ScanAnimation isScanning={isScanning} />
         </div>
 
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Scan Information</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Scan Information
+          </h2>
           {/* <ScanHistory logs={rfidLogs} /> */}
           {[...rfidLogs].reverse().map((log, index) => (
-  <UserCard
-    key={log.uid + index}
-    uid={log.uid}
-    timestamp={log.timestamp}
-    isLatest={index === 0}
-    log={log}
-  />
-))}
-
-
+            <UserCard
+              key={log.uid + index}
+              uid={log.uid}
+              timestamp={log.timestamp}
+              isLatest={index === 0}
+              log={log}
+              onViewDocument={setSelectedDocument}
+            />
+          ))}
         </div>
+        <DocumentModal
+          isOpen={!!selectedDocument}
+          onClose={() => setSelectedDocument(null)}
+          documentUrl={selectedDocument}
+        />
       </main>
     </div>
   );

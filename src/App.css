@@ -40,3 +40,8 @@
 .read-the-docs {
   color: #888;
 }
+iframe {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
