@@ -48,6 +48,22 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const handleRightClick = (e) => {
+      if (selectedDocument) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener("contextmenu", handleRightClick);
+
+    return () => {
+      document.removeEventListener("contextmenu", handleRightClick);
+    };
+  }, [selectedDocument]);
+
+
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -59,11 +75,10 @@ function App() {
               RFID Scanner Status
             </h2>
             <div
-              className={`px-3 py-1 text-xs rounded-full ${
-                isScanning
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-200 text-gray-600"
-              }`}
+              className={`px-3 py-1 text-xs rounded-full ${isScanning
+                ? "bg-green-500 text-white"
+                : "bg-gray-200 text-gray-600"
+                }`}
             >
               {isScanning ? "Active Scan" : "Ready to Scan"}
             </div>

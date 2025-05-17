@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@media print {
+  html, body {
+    display: none !important;
+  }
+}
+
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+    opacity: 0;
+  }
+}
