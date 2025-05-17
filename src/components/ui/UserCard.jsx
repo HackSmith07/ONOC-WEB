@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { MapPinIcon, AwardIcon as IdCardIcon, UserIcon } from "lucide-react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { firestoreDB } from "../../firebase";
+import { DownloadIcon } from "lucide-react"; // Add this with your existing imports
 
 const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
   const [data, setData] = useState(null);
-  
 
   useEffect(() => {
     if (!log?.uid) return;
@@ -88,12 +88,24 @@ const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
                       <span className="text-sm text-gray-700">
                         {doc.name || `Document ${idx + 1}`}
                       </span>
-                      <button
-                        onClick={() => onViewDocument(doc.path)}
-                        className="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
-                      >
-                        View
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => onViewDocument(doc.path)}
+                          className="ml-2 px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
+                        >
+                          View
+                        </button>
+                        <a
+                          href={doc.path}
+                          download
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800"
+                          title="Download Document"
+                        >
+                          <DownloadIcon size={20} />
+                        </a>
+                      </div>
                     </li>
                   )
                 )}
@@ -118,7 +130,6 @@ const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
           </div>
         </div>
       </div>
-      
     </div>
   );
 };
