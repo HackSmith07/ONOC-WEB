@@ -95,7 +95,7 @@ function App() {
             <UserCard
               key={log.uid + index}
               uid={log.uid}
-              timestamp={log.timestamp}
+             timestamp={new Date()}
               isLatest={index === 0}
               log={log}
               onViewDocument={setSelectedDocument}

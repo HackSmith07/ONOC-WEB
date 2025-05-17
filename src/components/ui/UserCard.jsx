@@ -11,7 +11,7 @@ const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
     if (!log?.uid) return;
 
     const unsubscribe = onSnapshot(
-      query(collection(firestoreDB, "userinfo"), where("rfid", "==", log.uid)),
+      query(collection(firestoreDB, "rfidDocs"), where("rfid", "==", log.uid)),
       (snapshot) => {
         const receiverData = snapshot.docs.map((doc) => ({
           id: doc.id,
@@ -23,6 +23,24 @@ const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
 
     return () => unsubscribe();
   }, [log?.uid]);
+
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return "";
+
+    // Convert Firebase Timestamp to JavaScript Date
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    const time = date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    return `${day}/${month}/${year} ${time}`;
+  };
 
   return (
     <div
@@ -76,39 +94,36 @@ const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
               Documents
             </h3>
 
-            {data?.uploadedDocuments &&
-            Object.keys(data.uploadedDocuments).length > 0 ? (
+            {data?.documents && Object.keys(data.documents).length > 0 ? (
               <ul className="space-y-2">
-                {Object.entries(data.uploadedDocuments).map(
-                  ([docId, doc], idx) => (
-                    <li
-                      key={docId}
-                      className="flex justify-between items-center p-2 bg-gray-50 rounded border border-gray-200"
-                    >
-                      <span className="text-sm text-gray-700">
-                        {doc.name || `Document ${idx + 1}`}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => onViewDocument(doc.path)}
-                          className="ml-2 px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
-                        >
-                          View
-                        </button>
-                        <a
-                          href={doc.path}
-                          download
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800"
-                          title="Download Document"
-                        >
-                          <DownloadIcon size={20} />
-                        </a>
-                      </div>
-                    </li>
-                  )
-                )}
+                {Object.entries(data.documents).map(([docId, doc], idx) => (
+                  <li
+                    key={docId}
+                    className="flex justify-between items-center p-2 bg-gray-50 rounded border border-gray-200"
+                  >
+                    <span className="text-sm text-gray-700">
+                      {doc.docName || `Document ${idx + 1}`}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => onViewDocument(doc.path)}
+                        className="ml-2 px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
+                      >
+                        View
+                      </button>
+                      <a
+                        href={doc.path}
+                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800"
+                        title="Download Document"
+                      >
+                        <DownloadIcon size={20} />
+                      </a>
+                    </div>
+                  </li>
+                ))}
               </ul>
             ) : (
               <p className="text-sm text-gray-400">No documents uploaded</p>
@@ -124,9 +139,7 @@ const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
                 ? `${uid.substring(0, 12)}${uid.length > 12 ? "..." : ""}`
                 : "N/A"}
             </div>
-            <div>
-              {timestamp ? new Date(timestamp).toLocaleString() : "N/A"}
-            </div>
+            <div>{formatTimestamp(timestamp)}</div>
           </div>
         </div>
       </div>
