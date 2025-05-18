@@ -22,14 +22,12 @@ const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
 
   return (
     <div
-      className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 transform ${
-        isLatest ? "ring-2 ring-blue-500 scale-100" : "scale-98 opacity-80"
-      }`}
+      className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 transform mb-10 w-[90%] ${isLatest ? "ring-2 ring-blue-500 scale-100" : "scale-98 opacity-80"
+        }`}
     >
       <div
-        className={`p-1 text-xs text-white ${
-          isLatest ? "bg-blue-500" : "bg-gray-500"
-        }`}
+        className={`p-1 text-xs text-white ${isLatest ? "bg-blue-500" : "bg-gray-500"
+          }`}
       >
         {isLatest ? "Latest Scan" : "Previous Scan"}
       </div>
@@ -59,7 +57,7 @@ const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
             {/* Address and other info below */}
             <div className="flex flex-col md:flex-row md:items-start md:gap-8">
               <div className="flex items-center text-sm text-gray-600">
-                <MapPinIcon size={16} className="mr-2 text-blue-500" />
+                <UserIcon size={16} className="mr-2 text-blue-500" />
                 <span>{log?.username || "Address not shared"}</span>
               </div>
             </div>

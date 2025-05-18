@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth"; // ✅ Add this line
 
 const firebaseConfig = {
   apiKey: "AIzaSyCGRrFpJT4ekEWCUGqf_UTHfLh3cq53_nw",
@@ -14,7 +15,8 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const realtimeDB = getDatabase(app);       // For Realtime Database (used in App.jsx)
-const firestoreDB = getFirestore(app);     // For Firestore (used in UserCard.jsx)
+const realtimeDB = getDatabase(app);
+const firestoreDB = getFirestore(app);
+const auth = getAuth(app); // ✅ Initialize auth
 
-export { app, realtimeDB, firestoreDB };
+export { app, realtimeDB, firestoreDB, auth }; // ✅ Export auth
