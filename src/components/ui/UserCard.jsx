@@ -1,7 +1,7 @@
 import { MapPinIcon, AwardIcon as IdCardIcon, UserIcon } from "lucide-react";
 import { DownloadIcon } from "lucide-react"; // Add this with your existing imports
 
-const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
+const UserCard = ({ isLatest, log, onViewDocument }) => {
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return "";
 
@@ -82,13 +82,13 @@ const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
                     </span>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => onViewDocument(doc.path)}
+                        onClick={() => onViewDocument(doc.downloadUrl)}
                         className="ml-2 px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
                       >
                         View
                       </button>
                       <a
-                        href={doc.path}
+                        href={doc.downloadUrl}
                         download
                         target="_blank"
                         rel="noopener noreferrer"
@@ -110,12 +110,9 @@ const UserCard = ({ uid, timestamp, isLatest, log, onViewDocument }) => {
         <div className="mt-6 pt-4 border-t border-gray-100">
           <div className="flex justify-between text-xs text-gray-500">
             <div>
-              UID:{" "}
-              {uid
-                ? `${uid.substring(0, 12)}${uid.length > 12 ? "..." : ""}`
-                : "N/A"}
+              Email : {log.email}
             </div>
-            <div>{formatTimestamp(timestamp)}</div>
+            <div>{formatTimestamp(log.tappedAt)}</div>
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ import { auth } from '../../firebase'; // adjust path if needed
 import { useNavigate } from 'react-router-dom';
 
 
-const Header = ({ instituteData }) => {
+const Header = ({instituteData}) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {

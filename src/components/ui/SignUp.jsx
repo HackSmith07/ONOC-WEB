@@ -1,10 +1,16 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { auth, firestoreDB as db } from '../../firebase';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
-import ONOCLogo from '../../assets/ONOC.png';
-
+import { auth, firestoreDB as db } from "../../firebase";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  collection,
+  setDoc,
+  doc,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+import ONOCLogo from "../../assets/ONOC.png";
 
 function SignUp() {
   const navigate = useNavigate();
@@ -26,7 +32,13 @@ function SignUp() {
   };
 
   const SignUp = async () => {
-    if (!formData.name || !formData.username || !formData.email || !formData.password || !formData.number) {
+    if (
+      !formData.name ||
+      !formData.username ||
+      !formData.email ||
+      !formData.password ||
+      !formData.number
+    ) {
       alert("Please fill all the fields");
       return;
     }
@@ -75,16 +87,18 @@ function SignUp() {
           displayName: formData.name,
         });
 
-        const docRef = await addDoc(collection(db, "institute"), {
+        const emailDocId = formData.email.replace(/\./g, "_").replace(/@/g, "_");;
+
+        await setDoc(doc(db, "institute", emailDocId), {
           id: user.uid,
           name: formData.name,
           number: normalizeNumber(formData.number),
           email: formData.email,
           username: formData.username,
+          rfidDocs : [],
         });
-        console.log("Document written with ID: ", docRef.id);
 
-        navigate('/AllData');
+        navigate("/AllData");
       })
       .catch((error) => {
         const errorMessage = error.message;
@@ -94,8 +108,8 @@ function SignUp() {
   };
 
   const normalizeNumber = (number) => {
-    if (!number) return '';
-    let cleaned = number.replace(/\D/g, '');
+    if (!number) return "";
+    let cleaned = number.replace(/\D/g, "");
     if (cleaned.length > 10) {
       cleaned = cleaned.slice(-10);
     }
@@ -105,17 +119,22 @@ function SignUp() {
   const handleSubmit = (e) => {
     e.preventDefault();
     SignUp();
-    console.log("Form Submitted:", formData);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-500 to-blue-700 flex flex-col items-center justify-start">
       <div className="w-full max-w-md bg-white mt-8 rounded-3xl p-6 shadow-md">
         <h2 className="text-2xl font-bold text-[#4B32C3]">Welcome to us,</h2>
-        <p className="text-lg text-gray-700 mb-4">Hello there, create New Account</p>
+        <p className="text-lg text-gray-700 mb-4">
+          Hello there, create New Account
+        </p>
 
         <div className="w-[100px] h-[70px] rounded-2xl overflow-hidden shadow-lg flex items-center justify-center mx-auto ">
-          <img src={ONOCLogo} alt="ONOC Logo" className="w-full h-full object-cover" />
+          <img
+            src={ONOCLogo}
+            alt="ONOC Logo"
+            className="w-full h-full object-cover"
+          />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -146,9 +165,13 @@ function SignUp() {
           </div>
 
           <div>
-            <label className="block text-[#4B32C3] font-medium">Phone Number</label>
+            <label className="block text-[#4B32C3] font-medium">
+              Phone Number
+            </label>
             <div className="flex">
-              <span className="px-4 py-2 bg-gray-200 border border-r-0 rounded-l-md text-gray-700">+91</span>
+              <span className="px-4 py-2 bg-gray-200 border border-r-0 rounded-l-md text-gray-700">
+                +91
+              </span>
               <input
                 type="tel"
                 name="number"
@@ -197,7 +220,10 @@ function SignUp() {
 
         <p className="text-center text-sm text-gray-600">
           Already have an Account?{" "}
-          <Link to="/Login" className="text-[#4B32C3] font-medium hover:underline">
+          <Link
+            to="/Login"
+            className="text-[#4B32C3] font-medium hover:underline"
+          >
             Login
           </Link>
         </p>

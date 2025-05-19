@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom"; // <-- import Link
 import { auth, firestoreDB as db } from '../../firebase';
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { signInWithEmailAndPassword} from 'firebase/auth';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useNavigate } from "react-router-dom";
 import ONOCLogo from '../../assets/ONOC.png';
@@ -58,29 +58,26 @@ function Login() {
     }
 
     signInWithEmailAndPassword(auth, emailToLogin, formData.password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        console.log(user);
+  .then(() => {
+    navigate('/AllData');
+  })
+  .catch((error) => {
+    console.error("Login failed:", error);
+    // Optionally show an error message to the user
+  });
 
-        navigate('/AllData');
-
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-      });
   }
 
-  const forgetPass = () => {
-    sendPasswordResetEmail(auth, formData.email)
-      .then(() => {
-        console.log("Email sent");
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-      });
-  }
+  // const forgetPass = () => {
+  //   sendPasswordResetEmail(auth, formData.email)
+  //     .then(() => {
+  //       console.log("Email sent");
+  //     })
+  //     .catch((error) => {
+  //       const errorCode = error.code;
+  //       const errorMessage = error.message;
+  //     });
+  // }
 
   const handleSubmit = (e) => {
     e.preventDefault();
