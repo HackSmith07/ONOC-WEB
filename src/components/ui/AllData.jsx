@@ -126,6 +126,7 @@ export default function AllData() {
             rfidDocs: arrayUnion({
               ...rfidDoc,
               tappedAt: new Date(),
+              status: "tapped",
             }),
           });
         }
