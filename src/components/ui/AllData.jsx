@@ -87,15 +87,15 @@ export default function AllData() {
         const docSnap = await getDoc(instituteDocRef);
         const existingDocs = docSnap.exists() ? docSnap.data().rfidDocs || [] : [];
 
-        // Use requestId for precise uniqueness instead of just rfid
+        
         const existingRequestIds = new Set(existingDocs.map((d) => d.requestId));
 
-        // Get all unique RFID values from logs
+        
         const rfidValues = Array.from(new Set(rfidLogs.map((log) => log.uid).filter(Boolean)));
 
         if (rfidValues.length === 0) return;
 
-        // Split into chunks of 10 for Firestore 'in' queries
+        
         const chunks = [];
         for (let i = 0; i < rfidValues.length; i += 10) {
           chunks.push(rfidValues.slice(i, i + 10));
@@ -144,7 +144,7 @@ export default function AllData() {
 
 
 
-  // Prevent right click on modal
+
   useEffect(() => {
     const handleRightClick = (e) => {
       if (selectedDocument) e.preventDefault();

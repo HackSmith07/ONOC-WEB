@@ -63,21 +63,11 @@ function Login() {
   })
   .catch((error) => {
     console.error("Login failed:", error);
-    // Optionally show an error message to the user
   });
 
   }
 
-  // const forgetPass = () => {
-  //   sendPasswordResetEmail(auth, formData.email)
-  //     .then(() => {
-  //       console.log("Email sent");
-  //     })
-  //     .catch((error) => {
-  //       const errorCode = error.code;
-  //       const errorMessage = error.message;
-  //     });
-  // }
+
 
   const handleSubmit = (e) => {
     e.preventDefault();

@@ -1,5 +1,5 @@
 import { MapPinIcon, AwardIcon as IdCardIcon, UserIcon } from "lucide-react";
-import { DownloadIcon } from "lucide-react"; // Add this with your existing imports
+import { DownloadIcon } from "lucide-react"; 
 
 const UserCard = ({ isLatest, log, onViewDocument }) => {
   const formatTimestamp = (timestamp) => {
@@ -50,11 +50,11 @@ const UserCard = ({ isLatest, log, onViewDocument }) => {
 
           <div className="flex-grow">
             {" "}
-            {/* Name and documents in one row */}
+            
             <h2 className="text-2xl font-bold text-gray-800">
               {log?.name || "Name not shared"}
             </h2>
-            {/* Address and other info below */}
+            
             <div className="flex flex-col md:flex-row md:items-start md:gap-8">
               <div className="flex items-center text-sm text-gray-600">
                 <UserIcon size={16} className="mr-2 text-blue-500" />
@@ -63,7 +63,7 @@ const UserCard = ({ isLatest, log, onViewDocument }) => {
             </div>
           </div>
 
-          {/* Documents Section */}
+          
           <div className="mt-4 md:mt-0 flex flex-col items-start mr-40">
             <h3 className="text-lg font-semibold text-gray-800 flex items-center mb-2">
               <IdCardIcon size={18} className="mr-2 text-blue-500" />
