@@ -28,23 +28,15 @@ export default function AllData() {
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [rfid, setrfid] = useState([]);
 
+  // Get current user and institute info
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setCurrentUser(user);
-        try {
-          const sanitizedEmail = user.email.replace(/\./g, "_").replace(/@/g, "_");
-          const docRef = doc(firestoreDB, "institute", sanitizedEmail);
-          const snapshot = await getDoc(docRef);
-
-          if (snapshot.exists()) {
-            setInstituteData(snapshot.data());
-          } else {
-            setInstituteData(null);
-          }
-        } catch (error) {
-          console.error("Error fetching user institute data:", error);
-        }
+        const sanitizedEmail = user.email.replace(/\./g, "_").replace(/@/g, "_");
+        const docRef = doc(firestoreDB, "institute", sanitizedEmail);
+        const snapshot = await getDoc(docRef);
+        setInstituteData(snapshot.exists() ? snapshot.data() : null);
       } else {
         setCurrentUser(null);
         setInstituteData(null);
@@ -55,6 +47,7 @@ export default function AllData() {
     return () => unsubscribe();
   }, []);
 
+  // Listen to realtimeDB for RFID taps
   useEffect(() => {
     const rfidRef = ref(realtimeDB, "rfid");
 
@@ -64,13 +57,11 @@ export default function AllData() {
         setIsScanning(true);
         setTimeout(() => setIsScanning(false), 2000);
 
-        // Avoid duplicates by UID
-        setRfidLogs((prevLogs) => {
-          const exists = prevLogs.some((log) => log.uid === data.uid);
-          return exists ? prevLogs : [...prevLogs, data];
+        setRfidLogs((prev) => {
+          const exists = prev.some((log) => log.uid === data.uid);
+          return exists ? prev : [...prev, data];
         });
 
-        // Remove processed RFID data
         remove(snapshot.ref).catch((err) =>
           console.error("Failed to remove processed RFID entry:", err)
         );
@@ -80,51 +71,65 @@ export default function AllData() {
     return () => unsubscribe();
   }, []);
 
+  // Fetch matching documents and push to institute rfidDocs
   useEffect(() => {
     const fetchDocs = async () => {
       if (rfidLogs.length === 0 || !currentUser) return;
 
       const firestore = getFirestore();
-      const userinfoRef = collection(firestore, "rfidDocs");
+      const rfidDocsRef = collection(firestore, "rfidDocs");
 
-      const sanitizedEmail = currentUser.email
-        .replace(/\./g, "_")
-        .replace(/@/g, "_");
+      // Sanitize the email to match Firestore doc ID format
+      const sanitizedEmail = currentUser.email.replace(/\./g, "_").replace(/@/g, "_");
       const instituteDocRef = doc(firestore, "institute", sanitizedEmail);
 
       try {
         const docSnap = await getDoc(instituteDocRef);
         const existingDocs = docSnap.exists() ? docSnap.data().rfidDocs || [] : [];
-        const existingUIDs = new Set(existingDocs.map((d) => d.uid));
 
-        const newUIDs = rfidLogs
-          .map((log) => log.uid)
-          .filter((uid) => uid && !existingUIDs.has(uid));
+        // Use requestId for precise uniqueness instead of just rfid
+        const existingRequestIds = new Set(existingDocs.map((d) => d.requestId));
 
-        if (newUIDs.length === 0) return;
+        // Get all unique RFID values from logs
+        const rfidValues = Array.from(new Set(rfidLogs.map((log) => log.uid).filter(Boolean)));
 
+        if (rfidValues.length === 0) return;
+
+        // Split into chunks of 10 for Firestore 'in' queries
         const chunks = [];
-        for (let i = 0; i < newUIDs.length; i += 10) {
-          chunks.push(newUIDs.slice(i, i + 10));
+        for (let i = 0; i < rfidValues.length; i += 10) {
+          chunks.push(rfidValues.slice(i, i + 10));
         }
 
         let newDocs = [];
         for (const chunk of chunks) {
-          const q = query(userinfoRef, where("rfid", "in", chunk));
+          const q = query(rfidDocsRef, where("rfid", "in", chunk));
           const snapshot = await getDocs(q);
-          snapshot.forEach((doc) => {
-            newDocs.push({ id: doc.id, ...doc.data() });
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            if (data.requestId && !existingRequestIds.has(data.requestId)) {
+              newDocs.push({ id: docSnap.id, ...data });
+            }
           });
         }
 
         if (newDocs.length === 0) return;
 
         for (const rfidDoc of newDocs) {
+          const cleanDoc = JSON.parse(JSON.stringify({
+            ...rfidDoc,
+            tappedAt: new Date(),
+          }));
+
+          // Add to institute's rfidDocs array
           await updateDoc(instituteDocRef, {
-            rfidDocs: arrayUnion({
-              ...rfidDoc,
-              tappedAt: new Date(),
-            }),
+            rfidDocs: arrayUnion(cleanDoc),
+          });
+
+          // Mark the document as synced
+          await updateDoc(doc(rfidDocsRef, rfidDoc.id), {
+            syncedToInstitute: true,
+            syncedAt: new Date(),
           });
         }
 
@@ -137,17 +142,15 @@ export default function AllData() {
     fetchDocs();
   }, [rfidLogs, currentUser]);
 
+
+
+  // Prevent right click on modal
   useEffect(() => {
     const handleRightClick = (e) => {
-      if (selectedDocument) {
-        e.preventDefault();
-      }
+      if (selectedDocument) e.preventDefault();
     };
-
     document.addEventListener("contextmenu", handleRightClick);
-    return () => {
-      document.removeEventListener("contextmenu", handleRightClick);
-    };
+    return () => document.removeEventListener("contextmenu", handleRightClick);
   }, [selectedDocument]);
 
   const handleRefresh = () => {
@@ -167,9 +170,8 @@ export default function AllData() {
               RFID Scanner Status
             </h2>
             <div
-              className={`px-3 py-1 text-xs rounded-full ${
-                isScanning ? "bg-green-500 text-white" : "bg-gray-200 text-gray-600"
-              }`}
+              className={`px-3 py-1 text-xs rounded-full ${isScanning ? "bg-green-500 text-white" : "bg-gray-200 text-gray-600"
+                }`}
             >
               {isScanning ? "Active Scan" : "Ready to Scan"}
             </div>
@@ -194,9 +196,9 @@ export default function AllData() {
             .reverse()
             .map((log, index) => (
               <UserCard
-                key={log.uid ? log.uid.toString() : `log-${index}`}
+                key={log.uid || `log-${index}`}
                 uid={log.uid}
-                timestamp={new Date()}
+                timestamp={new Date(log.tappedAt?.seconds * 1000 || Date.now())}
                 isLatest={index === 0}
                 log={log}
                 onViewDocument={setSelectedDocument}
